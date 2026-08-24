@@ -1,116 +1,140 @@
 "use client";
-
 import React, { useState } from "react";
-import { Users, Search, UserPlus, ShieldAlert, CheckCircle2, AlertTriangle, Phone, Calendar } from "lucide-react";
+import Link from "next/link";
+import { UserPlus, Search, ShieldCheck, ShieldAlert, AlertTriangle } from "lucide-react";
 
-export default function MemberManagementPage() {
+export default function MembersPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("ALL");
+  const [activeTab, setActiveTab] = useState("ALL");
 
+  // Sample data matching your current preview
   const members = [
-    { id: "TFG-01872", name: "Ahmed Khan", phone: "+92 300 1234567", dueDate: "2026-08-15", status: "ACTIVE", type: "GENTS" },
-    { id: "TFG-01944", name: "Bilal Yousafzai", phone: "+92 321 9876543", dueDate: "2026-08-10", status: "RESTRICTED", type: "GENTS" },
-    { id: "TFG-01102", name: "Hamza Shinwari", phone: "+92 333 5551122", dueDate: "2026-08-20", status: "ACTIVE", type: "GENTS" },
-    { id: "TFG-02011", name: "Ayesha Malik", phone: "+92 312 4447788", dueDate: "2026-08-11", status: "DUE_TODAY", type: "LADIES" },
+    { id: "TFG-01872", name: "Ahmed Khan", phone: "+92 300 1234567", dueDate: "2026-08-15", status: "ACTIVE" },
+    { id: "TFG-01944", name: "Bilal Yousafzai", phone: "+92 321 9876543", dueDate: "2026-08-10", status: "RESTRICTED" },
+    { id: "TFG-01102", name: "Hamza Shinwari", phone: "+92 333 5551122", dueDate: "2026-08-20", status: "ACTIVE" },
+    { id: "TFG-02011", name: "Ayesha Malik", phone: "+92 312 4447788", dueDate: "2026-08-11", status: "DUE TODAY" },
   ];
 
+  const filteredMembers = members.filter((m) => {
+    const matchesSearch =
+      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.phone.includes(searchTerm);
+
+    if (activeTab === "ACTIVE") return matchesSearch && m.status === "ACTIVE";
+    if (activeTab === "DUE TODAY") return matchesSearch && m.status === "DUE TODAY";
+    if (activeTab === "RESTRICTED") return matchesSearch && m.status === "RESTRICTED";
+    return matchesSearch;
+  });
+
   return (
-    <div className="min-h-screen bg-gray-900 p-4 md:p-8 text-white">
-      
-      {/* Header & Actions */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-6">
-        <div>
-          <h1 className="text-2xl font-black uppercase tracking-wider text-amber-500">The Fitness Garage — Members & Expiries</h1>
-          <p className="text-sm text-gray-400">Manage Memberships, Expiry Tracking & Automated Access Control</p>
-        </div>
-        <button className="flex items-center gap-2 bg-amber-500 text-black font-bold px-4 py-2.5 rounded-xl hover:bg-amber-400 transition">
-          <UserPlus className="h-5 w-5" /> Register New Member
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#0d1117] text-slate-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Header & Register Button */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-amber-500">THE FITNESS GARAGE — MEMBERS & EXPIRIES</h1>
+            <p className="text-xs text-slate-400 mt-1">Manage Memberships, Expiry Tracking & Automated Access Control</p>
+          </div>
 
-      {/* Search & Filter Toolbar */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4 justify-between">
-        <div className="relative flex-grow max-w-lg">
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search by Member ID, Name, or Phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-xl pl-12 pr-4 py-3 text-white placeholder-gray-400 outline-none focus:border-amber-500"
-          />
+          <Link
+            href="/dashboard/members/new"
+            className="inline-flex items-center justify-center bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition shadow-lg shadow-amber-500/10"
+          >
+            <UserPlus className="w-4 h-4 mr-2" /> Register New Member
+          </Link>
         </div>
-        <div className="flex gap-2 bg-gray-800 p-1 rounded-xl border border-gray-700">
-          {["ALL", "ACTIVE", "DUE_TODAY", "RESTRICTED"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition ${
-                filter === f ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              {f.replace("_", " ")}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Members Table */}
-      <div className="rounded-xl bg-gray-800 border border-gray-700 overflow-hidden shadow">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-900 text-gray-400 uppercase text-xs tracking-wider">
-              <tr>
-                <th className="p-4">Member ID</th>
-                <th className="p-4">Full Name</th>
-                <th className="p-4">Phone Number</th>
-                <th className="p-4">Due Date</th>
-                <th className="p-4">Access Status</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {members.map((m) => (
-                <tr key={m.id} className="hover:bg-gray-750 transition">
-                  <td className="p-4 font-mono text-xs font-bold text-amber-400">{m.id}</td>
-                  <td className="p-4 font-bold text-white">{m.name}</td>
-                  <td className="p-4 text-gray-300 flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-500" /> {m.phone}
-                  </td>
-                  <td className="p-4 text-gray-300">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4 text-gray-500" /> {m.dueDate}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    {m.status === "ACTIVE" && (
-                      <span className="inline-flex items-center gap-1 bg-emerald-950 text-emerald-400 border border-emerald-800 px-3 py-1 rounded-full text-xs font-bold">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> ACTIVE
-                      </span>
-                    )}
-                    {m.status === "RESTRICTED" && (
-                      <span className="inline-flex items-center gap-1 bg-red-950 text-red-400 border border-red-800 px-3 py-1 rounded-full text-xs font-bold">
-                        <ShieldAlert className="h-3.5 w-3.5" /> RESTRICTED
-                      </span>
-                    )}
-                    {m.status === "DUE_TODAY" && (
-                      <span className="inline-flex items-center gap-1 bg-orange-950 text-orange-400 border border-orange-800 px-3 py-1 rounded-full text-xs font-bold">
-                        <AlertTriangle className="h-3.5 w-3.5" /> DUE TODAY
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right">
-                    <button className="bg-gray-700 hover:bg-amber-500 hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition">
-                      Manage / Renew
-                    </button>
-                  </td>
+        {/* Search and Filters Toolbar */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by Member ID, Name, or Phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:border-amber-500 focus:outline-none text-slate-100"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+            {["ALL", "ACTIVE", "DUE TODAY", "RESTRICTED"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
+                  activeTab === tab
+                    ? "bg-amber-500 text-black"
+                    : "bg-slate-800 text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Members Table */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th className="p-4 font-semibold">Member ID</th>
+                  <th className="p-4 font-semibold">Full Name</th>
+                  <th className="p-4 font-semibold">Phone Number</th>
+                  <th className="p-4 font-semibold">Due Date</th>
+                  <th className="p-4 font-semibold">Access Status</th>
+                  <th className="p-4 font-semibold text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {filteredMembers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-12 text-slate-500">
+                      No members found matching your search.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredMembers.map((member) => (
+                    <tr key={member.id} className="hover:bg-slate-800/40 transition">
+                      <td className="p-4 font-mono font-medium text-amber-400">{member.id}</td>
+                      <td className="p-4 font-semibold text-slate-200">{member.name}</td>
+                      <td className="p-4 text-slate-400">{member.phone}</td>
+                      <td className="p-4 text-slate-300">{member.dueDate}</td>
+                      <td className="p-4">
+                        {member.status === "ACTIVE" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <ShieldCheck className="w-3 h-3 mr-1" /> ACTIVE
+                          </span>
+                        )}
+                        {member.status === "RESTRICTED" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                            <ShieldAlert className="w-3 h-3 mr-1" /> RESTRICTED
+                          </span>
+                        )}
+                        {member.status === "DUE TODAY" && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            <AlertTriangle className="w-3 h-3 mr-1" /> DUE TODAY
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 text-right">
+                        <button className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition border border-slate-700">
+                          Manage / Renew
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
   );
 }

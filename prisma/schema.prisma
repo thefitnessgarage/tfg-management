@@ -4,97 +4,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:password@localhost:5432/tfg_database"
-}
-
-enum Role {
-  OWNER
-  MANAGER
-}
-
-enum ShiftType {
-  GENTS_MORNING
-  GENTS_EVENING
-  LADIES_BOOTCAMP
-}
-
-enum TransactionType {
-  MEMBERSHIP_FEE
-  BAR_SALE
-  CREDIT_RECOVERY
-  EXPENSE
-}
-
-enum PaymentMethod {
-  CASH
-  MEMBER_CREDIT
-}
-
-model User {
-  id           String        @id @default(uuid())
-  name         String
-  role         Role          @default(MANAGER)
-  pinHash      String
-  createdAt    DateTime      @default(now())
-  shifts       Shift[]
-  transactions Transaction[]
 }
 
 model Member {
-  id           String        @id @default(uuid())
-  tfgId        String        @unique // e.g., TFG-01872
-  fullName     String
-  phone        String
-  dueDate      DateTime
-  isRestricted Boolean       @default(false)
-  creditBalance Float        @default(0.0)
-  createdAt    DateTime      @default(now())
-  transactions Transaction[]
-  accessLogs   AccessLog[]
-}
-
-model Shift {
-  id            String        @id @default(uuid())
-  managerId     String
-  manager       User          @relation(fields: [managerId], references: [id])
-  type          ShiftType
-  startTime     DateTime      @default(now())
-  endTime       DateTime?
-  expectedCash  Float         @default(0.0)
-  actualCash    Float?
-  variance      Float?
-  varianceNote  String?
-  isLocked      Boolean       @default(false)
-  transactions  Transaction[]
-}
-
-model Transaction {
-  id            String          @id @default(uuid())
-  shiftId       String
-  shift         Shift           @relation(fields: [shiftId], references: [id])
-  managerId     String
-  manager       User            @relation(fields: [managerId], references: [id])
-  memberId      String?
-  member        Member?         @relation(fields: [memberId], references: [id])
-  type          TransactionType
-  amount        Float
-  paymentMethod PaymentMethod   @default(CASH)
-  description   String
-  createdAt     DateTime        @default(now())
-}
-
-model AccessLog {
-  id        String   @id @default(uuid())
-  memberId  String
-  member    Member   @relation(fields: [memberId], references: [id])
-  timestamp DateTime @default(now())
-  direction String   @default("ENTRY")
-  status    String   // e.g., "GRANTED", "DENIED_OVERDUE"
-}
-
-model InventoryItem {
-  id       String @id @default(uuid())
-  name     String
-  price    Float
-  stockQty Int
+  id             String   @id @default(uuid())
+  tfgId          String   @unique
+  fullName       String
+  phone          String
+  membershipType String
+  totalPaid      Float
+  dueDate        DateTime
+  status         String
+  createdAt      DateTime @default(now())
 }
